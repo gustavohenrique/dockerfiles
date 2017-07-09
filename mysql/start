@@ -1,0 +1,80 @@
+#!/bin/bash
+set -e
+
+DB_NAME=${DB:-}
+DB_USER=${USER:-}
+DB_PASS=${PASS:-}
+DB_DUMP_FILE=${DUMP:-}
+
+
+function create_database() {
+  mysql --defaults-file=/etc/mysql/my.cnf -e "CREATE DATABASE IF NOT EXISTS $1 DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
+}
+
+function create_user() {
+  mysql --defaults-file=/etc/mysql/my.cnf -e "GRANT ALL PRIVILEGES ON *.* TO '$1'@'%' IDENTIFIED BY '$2' WITH GRANT OPTION;"
+}
+
+function start_mysql() {
+  echo "Starting MySQL server..."
+  /usr/bin/mysqld_safe >/dev/null 2>&1 &
+
+  # wait for mysql server to start (max 30 seconds)
+  timeout=30
+  echo -n "Waiting for database server to accept connections"
+  while ! /usr/bin/mysqladmin -u root status >/dev/null 2>&1
+  do
+    timeout=$(($timeout - 1))
+    if [ $timeout -eq 0 ]; then
+      echo -e "\nCould not connect to database server. Aborting..."
+      exit 1
+    fi
+    echo -n "."
+    sleep 1
+  done
+  echo
+}
+
+# disable error log
+sed 's/^log_error/# log_error/' -i /etc/mysql/my.cnf
+sed 's/127.0.0.1/0.0.0.0/' -i /etc/mysql/my.cnf
+
+# fix permissions and ownership of /var/lib/mysql
+mkdir -p -m 700 /var/lib/mysql
+chown -R mysql:mysql /var/lib/mysql
+
+# fix permissions and ownership of /run/mysqld
+mkdir -p -m 0755 /run/mysqld
+chown -R mysql:root /run/mysqld
+
+
+# initialize MySQL data directory
+if [ ! -d /var/lib/mysql/mysql ]; then
+  echo "Installing database..."
+  mysql_install_db --user=root >/dev/null 2>&1
+  #mysqladmin -u root password 'root'
+
+  start_mysql
+
+  /usr/bin/mysqladmin --defaults-file=/etc/mysql/my.cnf shutdown
+fi
+
+# check if db already exists
+if [ ! -d /var/lib/mysql/${DB_NAME} -a -n "${DB_NAME}" -a -n "${DB_USER}" -a -n "${DB_PASS}" ]; then
+  start_mysql
+
+  echo "Granting access to database \"${DB_PASS}\" for user \"${DB_USER}\"..."
+  create_database ${DB_NAME}
+  create_user ${DB_USER} ${DB_PASS}
+
+  if [ -f "${DB_DUMP_FILE}" ]; then
+    echo "Restoring dump \"${DB_DUMP_FILE}\"..."
+    mysql --defaults-file=/etc/mysql/my.cnf -D ${DB_NAME} -e "source ${DB_DUMP_FILE}"
+  fi
+
+  # shutdown
+  /usr/bin/mysqladmin --defaults-file=/etc/mysql/my.cnf shutdown
+
+fi
+
+exec /usr/bin/mysqld_safe
