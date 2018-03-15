@@ -13,6 +13,7 @@ Default values:
 - **HIDDEN**: 0 (0 for visible, 1 for hidden)
 - **IP**: 10.10.0.1
 - **SUBNET_MASK**: 24
+- **IPTABLES**: 1 (0 for running, 1 for skip)
 
 ```
 docker run --net=host --cap-add=NET_ADMIN --name=hostapd -e INTERFACE=wlxe84e06137f8e -e SSID=virus -e PASSWORD=12345678 -e HIDDEN=0 -e IP=10.10.0.1 gustavohenrique/hostapd

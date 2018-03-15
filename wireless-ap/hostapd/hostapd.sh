@@ -26,8 +26,12 @@ ip addr add ${IP:="10.10.0.1"}/24 dev ${INTERFACE} 2>/dev/null
 IP_ADDR=${IP:="10.10.0.1"}
 SUBNET=`echo $IP_ADDR | awk -F "." '{print $1"."$2"."$3".0"}'`
 MASK=${SUBNET_MASK:=24}
+SKIP_IPTABLES=${IPTABLES:=1}
 
-iptables -t nat -D POSTROUTING -s ${SUBNET}/${MASK} ! -d ${SUBNET}/${MASK} -j MASQUERADE > /dev/null 2>&1 || true
-iptables -t nat -A POSTROUTING -s ${SUBNET}/${MASK} ! -d ${SUBNET}/${MASK} -j MASQUERADE
+if [ "$SKIP_IPTABLES" -eq 0 ]; then
+    echo "[warning] Running iptables..."
+    iptables -t nat -D POSTROUTING -s ${SUBNET}/${MASK} ! -d ${SUBNET}/${MASK} -j MASQUERADE > /dev/null 2>&1 || true
+    iptables -t nat -A POSTROUTING -s ${SUBNET}/${MASK} ! -d ${SUBNET}/${MASK} -j MASQUERADE
+fi
 
 hostapd /hostapd/hostapd.conf
