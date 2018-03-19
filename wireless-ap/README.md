@@ -44,6 +44,14 @@ sudo systemctl restart NetworkManager
 
 ### Running 
 
+#### All-in-one command
+
+Using docker-compose:
+
+```
+docker-compose up -d
+```
+
 #### dnsmasq
 
 Dnsmasq is a lightweight DNS server.

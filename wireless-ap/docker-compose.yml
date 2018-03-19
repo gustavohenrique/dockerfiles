@@ -1,0 +1,37 @@
+version: '3'
+services:
+  dnsmasq:
+    image: gustavohenrique/dnsmasq
+    container_name: dnsmasq
+    cap_add:
+      - NET_ADMIN
+    network_mode: "host"
+    volumes:
+      - ~/.dnsmasq:/etc/dnsmasq
+
+  hostapd:
+    image: gustavohenrique/hostapd
+    container_name: hostapd
+    cap_add:
+      - NET_ADMIN
+    network_mode: "host"
+    environment:
+      - INTERFACE=wlxe84e06137f8e
+      - SSID=virus
+      - PASSWORD=12345678
+      - HIDDEN=0
+      - IP=10.10.0.1
+
+  udhcpd:
+    image: gustavohenrique/udhcpd
+    container_name: udhcpd
+    network_mode: "host"
+    volumes:
+      - ~/.udhcpd:/udhcpd
+    ports:
+      - "67:67"
+      - "67:67/udp"
+      - "68:68"
+      - "68:68/udp"
+    depends_on:
+      - hostapd
