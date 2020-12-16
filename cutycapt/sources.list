@@ -1,0 +1,2 @@
+deb http://old-releases.ubuntu.com/ubuntu/ lucid main restricted
+deb-src http://old-releases.ubuntu.com/ubuntu/ lucid main restricted

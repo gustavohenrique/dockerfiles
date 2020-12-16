@@ -1,0 +1,4 @@
+FROM postgres:13-alpine
+
+COPY ./anyarray/*.sql /docker-entrypoint-initdb.d/
+COPY ./additional-db.sh /docker-entrypoint-initdb.d/additional-db.sh

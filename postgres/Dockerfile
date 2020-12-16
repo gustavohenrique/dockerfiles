@@ -1,7 +1,7 @@
-FROM postgres:alpine
+FROM postgres:13-alpine
 MAINTAINER Gustavo Henrique <gustavo@gustavohenrique.net>
 
-ENV POSTGIS_VERSION 2.5.2
+ENV POSTGIS_VERSION 3.0.3
 
 RUN set -ex \
     \
