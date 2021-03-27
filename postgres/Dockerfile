@@ -1,7 +1,7 @@
 FROM postgres:13-alpine
 MAINTAINER Gustavo Henrique <gustavo@gustavohenrique.net>
 
-ENV POSTGIS_VERSION 3.0.3
+ENV POSTGIS_VERSION 3.1.1
 
 RUN set -ex \
     \
@@ -27,16 +27,19 @@ RUN set -ex \
         libtool \
         libxml2-dev \
         make \
+        git \
+        llvm10-dev \
         perl \
+        libressl3.1-libcrypto \
     \
     && apk add --no-cache --virtual .crypto-rundeps \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
-        libressl2.7-libcrypto \
     && apk add --no-cache --virtual .build-deps-testing \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
         gdal-dev \
         geos-dev \
-        proj4-dev \
+        proj-dev \
+        clang-dev \
         protobuf-c-dev \
     && cd /usr/src/postgis \
     && ./autogen.sh \
@@ -49,7 +52,6 @@ RUN set -ex \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
         geos \
         gdal \
-        proj4 \
         protobuf-c \
     && cd / \
     && rm -rf /usr/src/postgis \
