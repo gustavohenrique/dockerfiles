@@ -1,4 +1,19 @@
-FROM postgres:13-alpine
+FROM postgres:14-alpine
 
 COPY ./anyarray/*.sql /docker-entrypoint-initdb.d/
 COPY ./additional-db.sh /docker-entrypoint-initdb.d/additional-db.sh
+
+RUN apk add --update libprotobuf protobuf-dev protobuf-c-dev protobuf-c-compiler git alpine-sdk clang clang-dev llvm12-dev \
+ && mkdir -p /etc/postgresql 2>/dev/null \
+ && git clone --depth 1 https://github.com/debezium/postgres-decoderbufs.git \
+ && cd postgres-decoderbufs/proto \
+ && (echo 'syntax = "proto2";' && cat pg_logicaldec.proto) > file.proto \
+ && protoc-c --c_out=../src/proto file.proto \
+ && cd .. \
+ && make \
+ && make install
+
+COPY ./postgresql.conf /etc/postgresql/postgresql.conf
+RUN chmod 0777 -Rf /etc/postgresql
+
+CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]

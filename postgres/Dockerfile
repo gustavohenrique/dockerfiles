@@ -1,4 +1,4 @@
-FROM postgres:13-alpine
+FROM postgres:14-alpine
 MAINTAINER Gustavo Henrique <gustavo@gustavohenrique.net>
 
 ENV POSTGIS_VERSION 3.1.1
