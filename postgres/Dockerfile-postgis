@@ -1,7 +1,7 @@
 FROM postgres:14-alpine
 MAINTAINER Gustavo Henrique <gustavo@gustavohenrique.net>
 
-ENV POSTGIS_VERSION 3.1.1
+ENV POSTGIS_VERSION 3.3.0
 
 RUN set -ex \
     \
@@ -20,44 +20,42 @@ RUN set -ex \
     && rm postgis.tar.gz \
     \
     && apk add --no-cache --virtual .build-deps \
-        autoconf \
-        automake \
-        g++ \
-        json-c-dev \
-        libtool \
-        libxml2-dev \
-        make \
-        git \
-        llvm10-dev \
-        perl \
-        libressl3.1-libcrypto \
-    \
-    && apk add --no-cache --virtual .crypto-rundeps \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
-    && apk add --no-cache --virtual .build-deps-testing \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
         gdal-dev \
         geos-dev \
         proj-dev \
+        autoconf \
+        automake \
         clang-dev \
+        file \
+        g++ \
+        gcc \
+        gettext-dev \
+        json-c-dev \
+        libtool \
+        libxml2-dev \
+        llvm-dev \
+        make \
+        pcre-dev \
+        perl \
         protobuf-c-dev \
+        git \
+    \
     && cd /usr/src/postgis \
     && ./autogen.sh \
     && ./configure \
     && make \
     && make install \
     && apk add --no-cache --virtual .postgis-rundeps \
-        json-c \
-    && apk add --no-cache --virtual .postgis-rundeps-testing \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
         geos \
         gdal \
+        proj \
+        json-c \
+        libstdc++ \
+        pcre \
         protobuf-c \
     && cd / \
     && rm -rf /usr/src/postgis \
-    && apk del .fetch-deps .build-deps .build-deps-testing
+    && apk del .fetch-deps .build-deps
 
 COPY ./anyarray/*.sql /docker-entrypoint-initdb.d/
-COPY ./initdb-postgis.sh /docker-entrypoint-initdb.d/postgis.sh
 COPY ./additional-db.sh /docker-entrypoint-initdb.d/additional-db.sh
-COPY ./update-postgis.sh /usr/local/bin
