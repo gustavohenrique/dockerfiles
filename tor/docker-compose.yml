@@ -1,0 +1,30 @@
+version: '3'
+
+networks:
+  onion:
+    driver: bridge
+
+services:
+  tor:
+    build: .
+    restart: unless-stopped
+    container_name: tor
+    ports:
+      - 9050:9050
+    volumes:
+      - data:/var/lib/tor
+    networks:
+      - onion
+
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    container_name: nginx
+    volumes:
+      - ./html:/usr/share/nginx/html
+    networks:
+      - onion
+
+volumes:
+  data:
+    driver: local

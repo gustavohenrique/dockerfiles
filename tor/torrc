@@ -1,0 +1,4 @@
+SocksPort 0.0.0.0:9050
+HiddenServiceDir /var/lib/tor/service/
+HiddenServicePort 80 nginx:80
+RunAsDaemon 1
