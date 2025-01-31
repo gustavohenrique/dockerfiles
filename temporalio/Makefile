@@ -1,2 +1,2 @@
 build:
-	@docker build . -t=gustavohenrique/temporalio:1.22
+	@docker build . -t=gustavohenrique/temporalio

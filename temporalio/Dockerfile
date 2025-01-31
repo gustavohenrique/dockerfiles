@@ -1,8 +1,8 @@
-FROM alpine:3.18
+FROM alpine
 
-RUN sh -c 'apk add --update wget \
+RUN sh -c 'apk add --update --no-cache wget \
  && wget https://temporal.download/cli.sh \
  && sh cli.sh \
- && mv ~/.temporalio/bin/temporal /usr/local/bin'
+ && mv ~/.temporalio/bin/temporal /usr/local/bin/'
 
-ENTRYPOINT "temporal"
+CMD ["temporal", "server", "start-dev", "--ip", "0.0.0.0"]
